@@ -5,7 +5,7 @@
 //              translate and re-send mouse and keyboard events 
 //              from SDL event loop to AntTweakBar
 //  
-//  @author     Philippe Decaudin - http://www.antisphere.com
+//  @author     Philippe Decaudin
 //  @license    This file is part of the AntTweakBar library.
 //              For conditions of distribution and use, see License.txt
 //
@@ -18,7 +18,12 @@
 
 int TW_CALL TwEventSDL12(const void *sdlEvent); // implemented in TwEventSDL12.c
 int TW_CALL TwEventSDL13(const void *sdlEvent); // implmeneted in TwEventSDL13.c
-int TW_CALL TwSetLastError(const char *staticErrorMessage);
+#ifdef  __cplusplus
+    extern "C" { int TW_CALL TwSetLastError(const char *staticErrorMessage); }
+#else
+    int TW_CALL TwSetLastError(const char *staticErrorMessage);
+#endif  // __cplusplus
+
 
 //  TwEventSDL returns zero if msg has not been handled or the SDL version 
 //  is not supported, and a non-zero value if it has been handled by the 

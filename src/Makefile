@@ -1,25 +1,27 @@
 ####### Compiler, tools and options
 
-SO_EXT		= .dylib
+#---- LINUX
+SO_EXT		= .so
+SO_VERSION	= 1
+AR_EXT		= .a
 
 #---- Release
-CXXCFG   	= -O3 -arch x86_64
-LFLAGS		=  -arch x86_64
+CXXCFG   	= -O3
+LFLAGS		= 
 OUT_DIR		= ../lib
 #---- Debug
-#CXXCFG   	= -g -D_DEBUG -arch i386 -arch x86_64
-#LFLAGS		= -arch i386 -arch x86_64
+#CXXCFG   	= -g -D_DEBUG
+#LFLAGS		= 
 #OUT_DIR	= ../lib/debug
 
-#BASE		= /Developer/SDKs/MacOSX10.5.sdk/System/Library/Frameworks
+
 CXX      	= gcc
-CXXFLAGS 	= $(CXXCFG) -Wall -fPIC -fno-strict-aliasing -D_MACOSX -ObjC++  -D__PLACEMENT_NEW_INLINE
+CXXFLAGS 	= $(CXXCFG) -Wall -fPIC -fno-strict-aliasing -D_UNIX -D__PLACEMENT_NEW_INLINE
 INCPATH  	= -I../include -I/usr/local/include -I/usr/X11R6/include -I/usr/include
-#-I$(BASE)/OpenGL.framework/Headers/ -I$(BASE)/GLUT.framework/Headers/ -I$(BASE)/AppKit.framework/Headers/
 LINK     	= gcc
 #LIBS     	= -L/usr/X11R6/lib -L. -lglfw -lGL -lGLU -lX11 -lXxf86vm -lXext -lpthread -lm
 #LIBS     	= -L/usr/X11R6/lib -lGL -lX11 -lXxf86vm -lXext -lpthread -lm
-LIBS 		= -framework OpenGL -framework GLUT -framework AppKit
+LIBS 		=
 AR       	= ar cqs
 RANLIB   	=
 TAR      	= tar -cf
@@ -38,10 +40,10 @@ NO_STDERR	= 2> /dev/null
 
 
 # name of the application:
-TARGET 	    = AntTweakBar
+TARGET 		= AntTweakBar
 
 # source files without extension:
-SRC_FILES	= TwColors.cpp TwFonts.cpp TwOpenGL.cpp TwBar.cpp TwMgr.cpp TwPrecomp.cpp LoadOGL.cpp TwEventGLFW.c TwEventGLUT.c TwEventSDL.c TwEventSDL12.c TwEventSDL13.c TwEventSFML.cpp
+SRC_FILES	= TwColors.cpp TwFonts.cpp TwOpenGL.cpp TwOpenGLCore.cpp TwBar.cpp TwMgr.cpp TwPrecomp.cpp LoadOGL.cpp LoadOGLCore.cpp TwEventGLFW.c TwEventGLUT.c TwEventSDL.c TwEventSDL12.c TwEventSDL13.c TwEventSFML.cpp TwEventX11.c
 
 # build object list from source files
 OBJS_1 		= $(SRC_FILES:.c=.o)
@@ -64,7 +66,9 @@ all: 	Makefile $(TARGET)
 
 $(TARGET): $(OBJS)
 	@echo "===== Link $@ ====="
-	$(LINK) $(LFLAGS) -dynamiclib -Wl,-undefined -Wl,dynamic_lookup  -o $(OUT_DIR)/lib$(TARGET)$(SO_EXT) $(OBJS) $(LIBS)
+	$(LINK) $(LFLAGS) -shared -Wl,-soname,lib$(TARGET)$(SO_EXT).$(SO_VERSION) -o $(OUT_DIR)/lib$(TARGET)$(SO_EXT) $(OBJS) $(LIBS)
+	$(SYMLINK) $(OUT_DIR)/lib$(TARGET)$(SO_EXT) $(OUT_DIR)/lib$(TARGET)$(SO_EXT).$(SO_VERSION)
+	$(AR) $(OUT_DIR)/lib$(TARGET)$(AR_EXT) $(OBJS) $(LIBS)
 
 .cpp.o:
 	@echo "===== Compile $< ====="
@@ -85,6 +89,7 @@ clean:
 TwColors.o:    TwPrecomp.h TwColors.h
 TwFonts.o:     TwPrecomp.h ../include/AntTweakBar.h TwFonts.h TwMgr.h TwColors.h TwGraph.h AntPerfTimer.h
 TwOpenGL.o:    TwPrecomp.h ../include/AntTweakBar.h TwOpenGL.h LoadOGL.h TwGraph.h TwColors.h TwFonts.h TwMgr.h AntPerfTimer.h
+TwOpenGLCore.o: TwPrecomp.h ../include/AntTweakBar.h TwOpenGLCore.h LoadOGLCore.h TwGraph.h TwColors.h TwFonts.h TwMgr.h AntPerfTimer.h
 TwBar.o:       TwPrecomp.h ../include/AntTweakBar.h TwBar.h TwMgr.h TwColors.h TwFonts.h TwGraph.h AntPerfTimer.h
 TwMgr.o:       TwPrecomp.h ../include/AntTweakBar.h TwMgr.h TwColors.h TwFonts.h TwGraph.h AntPerfTimer.h TwBar.h TwOpenGL.h res/TwXCursors.h
 TwPrecomp.o:   TwPrecomp.h
@@ -94,3 +99,4 @@ TwEventGLUT.o: ../include/AntTweakBar.h MiniGLUT.h
 TwEventSDL.o:  ../include/AntTweakBar.h
 TwEventSDL12.o:  ../include/AntTweakBar.h MiniSDL12.h
 TwEventSDL13.o:  ../include/AntTweakBar.h MiniSDL13.h
+TwEventX11.o:  ../include/AntTweakBar.h
